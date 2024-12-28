@@ -1,9 +1,10 @@
 <?php
 
 include '../../includes/app.php';
+use App\Vendedor;
 use App\Propiedad;
-use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 // Proteger esta ruta.
 estaAutenticado();
@@ -17,10 +18,8 @@ if(!$id) {
 
 // Obtener la propiedad
 $propiedad = Propiedad::find($id);
+$vendedores = Vendedor::all();
 
-// obtener vendedores
-$consulta = "SELECT * FROM vendedores";
-$resultado = mysqli_query($db, $consulta);
 
 $errores = Propiedad::getErrores();
 
@@ -42,8 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errores)) {
-        //almacenar la imagen
-        $imagen->save(CARPETA_IMAGENES . $nombreImagen);
+        if ($_FILES['propiedad']['tmp_name']['imagen']) {
+            //almacenar la imagen
+            $imagen->save(CARPETA_IMAGENES . $nombreImagen);
+        }
         $propiedad->guardar();
     }
 }

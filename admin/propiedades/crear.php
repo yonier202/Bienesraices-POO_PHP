@@ -2,19 +2,16 @@
 
 include '../../includes/app.php';
 use App\Propiedad;
+use App\Vendedor;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
 // Proteger esta ruta.
 estaAutenticado();
 
-$db = conectarDb();
-
 $propiedad = new Propiedad();
 
-$consulta = "SELECT * FROM vendedores";
-$resultado = mysqli_query($db, $consulta);
-
+$vendedores = Vendedor::all();
 // Validar 
 $errores = Propiedad::getErrores();
 
@@ -77,7 +74,6 @@ incluirTemplate('header');
 <?php
 
 incluirTemplate('footer');
-
-mysqli_close($db); ?>
+?>
 
 </html>
