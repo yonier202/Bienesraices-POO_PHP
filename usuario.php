@@ -1,12 +1,26 @@
-<?php
-require 'includes/config/database.php';
-$db=conectarDB();
+<?php 
 
-//Crear un Email y password
+    // Consultar la propiedad
+    require 'includes/app.php';
+    $db = conectarDb();
 
-$email='yonier202@gmail.com';
-$password = password_hash('3125052551', PASSWORD_DEFAULT);
 
-$query = "INSERT INTO usuarios (email,password) VALUES ('$email', '$password');";
+    // Inserta un admin
+    $email = "correo@correo.com";
+    $password = "hola";
 
-mysqli_query($db,$query);
+    $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+    // echo strlen($passwordHash);
+
+
+    // echo $passwordHash;
+
+
+    $query = "INSERT INTO usuarios (email, password) VALUES('$email', '$passwordHash') ";
+
+    echo $query;
+
+    mysqli_query($db, $query);
+
+
+?>

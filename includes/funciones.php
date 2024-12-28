@@ -1,16 +1,31 @@
 <?php
 
-require 'app.php';
-function incluirTemplate( string $nombre, bool $inicio = false){
+define('FUNCIONES_URL', __DIR__ . "/funciones.php");
+define('TEMPLATES_URL', __DIR__ . "/templates");
+define('CARPETA_IMAGENES', __DIR__ . '/../imagenes/');
+
+function incluirTemplate(string $nombre, bool $inicio = false)
+{
     include TEMPLATES_URL . "/$nombre.php";
 }
 
-function estadoAutenticado() {
+function estaAutenticado()  {
     session_start();
-    $auth = $_SESSION['login'];
+    
+    if(!$_SESSION['login']) {
+        header('Location: /');
+    } 
 
-    if ($auth) {
-        return true;
-    }
-    return false;
+}
+
+function debuguear($variable) {
+    echo "<pre>";
+    var_dump($variable);
+    echo "</pre>";
+    exit;
+}
+// escapa el html 
+function s($html){
+    $s = htmlspecialchars($html);
+    return $s;
 }

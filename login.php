@@ -1,85 +1,93 @@
 <?php
-    require 'includes/config/database.php';
-    $db = conectarDB();
 
-    $errores = [];
+// Incluir conexion
+require 'includes/app.php';
+$db = conectarDb();
 
-    // Autenticar el usuario
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        echo "<pre>";
-        var_dump($_POST);
-        echo "</pre>";
+$errores = [];
 
-        $email = mysqli_real_escape_string($db, filter_var($_POST['email'], FILTER_VALIDATE_EMAIL));
-        $password = mysqli_real_escape_string($db, $_POST['password']);
 
-        if (!$email) {
-            $errores[] = "El email es obligatorio o no es válido";
-        }
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // echo "<pre>";
+    // var_dump($_POST);
+    // echo "</pre>";
 
-        if (!$password) {
-            $errores[] = "El password es obligatorio";
-        }
+    $email = $_POST['email'];
+    $email = mysqli_real_escape_string($db,  filter_var($email, FILTER_VALIDATE_EMAIL) );
 
-        // Si no hay errores
-        if (empty($errores)) {
-            // Revisar si el usuario existe
-            $sql = "SELECT * FROM usuarios WHERE email = '$email'";
-            $result = mysqli_query($db, $sql);
+    $password = mysqli_real_escape_string($db,  $_POST['password'] );
 
-            if ($result->num_rows) { // Si hay un resultado
-                // Revisar si el password es correcto
-                $usuario = mysqli_fetch_assoc($result);
 
-                // Comprobar si la contraseña coincide con la encriptada en la base de datos
-                $auth = password_verify($password, $usuario['password']);
-
-                if ($auth) {
-                    // Iniciar sesión
-                    session_start();
-                    $_SESSION['usuario'] = $usuario['email'];
-                    $_SESSION['login'] = true;
-
-                    header('Location: /admin');
-                } else {
-                    $errores[] = "Contraseña incorrecta";
-                }
-            } else {
-                // Si el usuario no existe
-                $errores[] = "El usuario no existe";
-            }
-        }
+    if(!$email) {
+        $errores[] = 'El Email es Obligatorio o no válido';
     }
 
-    // Incluir el template de header
-    include './includes/funciones.php';
-    incluirTemplate('header');
+    if(!$password) {
+        $errores[] = 'El Password es obligatorio';
+    }
+  
+    if(empty($errores)) {
+  
+        // Revisar si el usuario existe
+        $query = "SELECT * FROM usuarios WHERE email = '$email' ";
+        $resultado = mysqli_query($db, $query);
+
+        // El usuario existe.
+
+        if($resultado->num_rows) {
+            // Revisar si el password esta bien
+            $usuario = mysqli_fetch_assoc($resultado);
+    
+            // Password a revisar y el de la BD.
+            $auth = password_verify($password, $usuario['password']);
+
+            if($auth) {
+                // Autenticado.
+
+                // Para autenticar usuarios estaremos utilizando la superglobal SESSION, esta va a mantener eso una sesión activa en caso de que sea valida.
+                session_start();
+                $_SESSION['usuario'] = $usuario['email'];
+                $_SESSION['id'] =$usuario['id'];
+                $_SESSION['login'] = true;
+                header('Location: /admin');
+            } else {
+                // No autenticado
+                $errores[] = 'El Password es incorrecto';
+            }
+        
+        } else {
+
+            $errores[] = 'El Usuario no existe';
+        }
+   
+    }
+}
+
+incluirTemplate('header');
 ?>
 
 <main class="contenedor seccion contenido-centrado">
-    <h1>Iniciar Sesión</h1>
+    <h1 class="fw-300 centrar-texto">Iniciar Sesión</h1>
 
-    <?php foreach($errores as $error) { ?>
+    <?php foreach ($errores as $error) : ?>
         <div class="alerta error">
-            <p><?php echo $error; ?></p>
+            <?php echo $error; ?>
         </div>
-    <?php } ?>
+    <?php endforeach; ?>
 
-    <form method="post" class="formulario">
+    <form method="POST" class="formulario" novalidate>
         <fieldset>
             <legend>Email y Password</legend>
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" placeholder="Tu Email" >
 
-            <label for="email">E-mail</label>
-            <input type="email" placeholder="Tu Email" id="email" name="email">
-
-            <label for="password">Password</label>
-            <input type="password" placeholder="Tu Password" id="password" name="password">
+            <label for="password">Password: </label>
+            <input type="password" name="password" id="password" placeholder="Tu Password" >
         </fieldset>
-
         <input type="submit" value="Iniciar Sesión" class="boton boton-verde">
     </form>
 </main>
 
 <?php
-    incluirTemplate('footer');
+incluirTemplate('footer');
 ?>
